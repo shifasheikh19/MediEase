@@ -1,81 +1,76 @@
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import axios from 'axios'
+import axios from 'axios';
 
-export const AppContext = createContext()
+export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
 
-    const currencySymbol = '₹'
-    const backendUrl = import.meta.env.VITE_BACKEND_URL
+    const currencySymbol = '₹';
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
-    const [doctors, setDoctors] = useState([])
-    const [token, setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : '')
-    const [userData, setUserData] = useState(false)
+    const [doctors, setDoctors] = useState([]);
+    const [token, setToken] = useState(localStorage.getItem('token') || '');
+    const [userData, setUserData] = useState(false);
 
-    // Getting Doctors using API
+    // ✅ Load doctors list
     const getDoctosData = async () => {
-
         try {
-
-            const { data } = await axios.get(backendUrl + '/api/doctor/list')
+            const { data } = await axios.get(backendUrl + '/api/doctor/list');
             if (data.success) {
-                setDoctors(data.doctors)
+                setDoctors(data.doctors);
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            console.log(error)
-            toast.error(error.message)
+            console.log(error);
+            toast.error(error.message || "Failed to fetch doctors");
         }
+    };
 
-    }
-
-    // Getting User Profile using API
+    // ✅ Load user profile when manually called
     const loadUserProfileData = async () => {
-
         try {
-
-            const { data } = await axios.get(backendUrl + '/api/user/get-profile', { headers: { token } })
+            const { data } = await axios.get(backendUrl + '/api/user/get-profile', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
             if (data.success) {
-                setUserData(data.userData)
+                setUserData(data.userData);
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            console.log(error)
-            toast.error(error.message)
+            console.log(error);
+            toast.error(error.response?.data?.message || "Failed to load profile");
         }
-
-    }
+    };
 
     useEffect(() => {
-        getDoctosData()
-    }, [])
+        getDoctosData();
+    }, []);
 
-    useEffect(() => {
-        if (token) {
-            loadUserProfileData()
-        }
-    }, [token])
+    // ❌ REMOVED auto profile fetch on token change
 
     const value = {
-        doctors, getDoctosData,
+        doctors,
+        getDoctosData,
         currencySymbol,
         backendUrl,
-        token, setToken,
-        userData, setUserData, loadUserProfileData
-    }
+        token,
+        setToken,
+        userData,
+        setUserData,
+        loadUserProfileData
+    };
 
     return (
         <AppContext.Provider value={value}>
             {props.children}
         </AppContext.Provider>
-    )
+    );
+};
 
-}
-
-export default AppContextProvider
+export default AppContextProvider;
