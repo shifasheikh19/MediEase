@@ -15,7 +15,7 @@ const Navbar = () => {
 
   return (
     <nav className="flex justify-between py-4 items-center">
-      <Link to="/" className="text-2xl font-bold text-blue-700">Prescripto</Link>
+      <Link to="/" className="text-2xl font-bold text-blue-700">MediEase</Link>
       <ul className="flex gap-6 items-center">
         <li><Link to="/">Home</Link></li>
         <li><Link to="/doctors">All Doctors</Link></li>
